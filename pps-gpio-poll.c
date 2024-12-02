@@ -93,30 +93,25 @@ static int pps_gpio_register(void)
 	/* GPIO setup */
 	ret = gpio_request(gpio, "PPS");
 	if (ret) {
-		pr_warning("failed to request PPS GPIO %u\n", gpio);
+		pr_warn("failed to request PPS GPIO %u\n", gpio);
 		return -EINVAL;
 	}	
 	ret = gpio_direction_input(gpio);
 	if (ret) {
-		pr_warning("failed to set PPS GPIO direction\n");
+		pr_warn("failed to set PPS GPIO direction\n");
 		goto error1;
 	}
-	/* don't bother with GPIOs on slow busses like SPI, I2C, LPC */
-	ret = gpio_cansleep(gpio);
-	if (ret) {
-		pr_warning("GPIO %u not suitable for polling\n", gpio);
-		goto error1;
-	}
+
 	#ifdef GPIO_ECHO
 	if (gpio_echo >= 0) {
 		ret = gpio_request(gpio_echo, "PPS echo");
 		if (ret) {
-			pr_warning("failed to request PPS echo GPIO %u\n", gpio_echo);
+			pr_warn("failed to request PPS echo GPIO %u\n", gpio_echo);
 			goto error1;
 		}
 		ret = gpio_direction_output(gpio_echo, 0);
 		if (ret) {
-			pr_warning("failed to set PPS echo GPIO direction\n");
+			pr_warn("failed to set PPS echo GPIO direction\n");
 			goto error;
 		}
 	}
@@ -213,17 +208,21 @@ static enum hrtimer_restart gpio_wait(struct hrtimer *t)
 			/* this is the first event, start busy waiting
 			 * poll/2 microseconds before the next */
 			ktime = ktime_set(0, (interval - poll/2)*1000);
+			if (debug)
+				pr_info("Scheduling next busy polling from expected interval (wait: %d us)\n", interval - poll/2);
 		} else {
 			/* we know the time between events, start busy waiting
 			 * "wait" microseconds before the next event */
 			ktime = monotonic;
 			ktime = ktime_sub(ktime, last_ts);
 			ktime = ktime_sub_ns(ktime, wait*1000);
+			if (debug)
+				pr_info("Scheduling next busy polling from measured delta (wait: %lld us)\n", ktime_to_ns(ktime)/1000);
 		}
 		last_ts = monotonic;
 	} else {
 		/* we missed the event inside the loop, return to polling mode */
-		pr_info("missed PPS pulse\n");
+		pr_info("Missed PPS pulse\n");
 		ktime = ktime_set(0, poll*1000);
 		timer.function = &gpio_poll;
 	}
@@ -237,7 +236,7 @@ static enum hrtimer_restart gpio_wait(struct hrtimer *t)
 		#endif
 	}
 	if (debug)
-		pr_info("%d GPIO reads\n", i);
+		pr_info("GPIO reads: '%d' \n", i);
 
 	return HRTIMER_NORESTART;
 }
