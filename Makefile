@@ -1,4 +1,23 @@
-obj-m := pps-gpio-poll.o
+SHELL := /bin/bash
+KVER ?= $(shell uname -r)
+KSRC := /lib/modules/$(KVER)/build
 PWD := $(shell pwd)
-default:
-	$(MAKE) -C $(KDIR) HOSTCFLAGS=$(HOSTCFLAGS) CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(ARCH) KBUILD_HAVE_NLS=$(KBUILD_HAVE_NLS) CC=$(CC) SUBDIRS=$(PWD) modules
+
+obj-m := pps-gpio-poll.o
+
+.PHONY: all install uninstall modules_install clean
+
+all:
+	$(MAKE) -C $(KSRC) M=$(PWD) modules
+
+install: all
+	make -C $(KSRC) M=$(PWD) modules_install
+
+uninstall:
+	make -C $(KSRC) M=$(PWD) modules_uninstall
+
+modules_install:
+	$(MAKE) -C $(KSRC) M=$(PWD) modules_install
+
+clean:
+	make -C $(KSRC) M=$(PWD) clean
