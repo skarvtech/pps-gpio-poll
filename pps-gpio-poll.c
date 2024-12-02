@@ -235,8 +235,11 @@ static enum hrtimer_restart gpio_wait(struct hrtimer *t)
 			hrtimer_start(&echo_timer, ktime_set(0, 5e8L), HRTIMER_MODE_REL);
 		#endif
 	}
-	if (debug)
+	if (debug) {
+		// Note: If this drops too low the PPS pulse will be missed
+		// 		 Increase the wait time until this is high enough to account for outliers
 		pr_info("GPIO reads: '%d' \n", i);
+	}
 
 	return HRTIMER_NORESTART;
 }
