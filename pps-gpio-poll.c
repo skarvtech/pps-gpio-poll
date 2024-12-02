@@ -45,8 +45,8 @@ static int poll = 800;
 static int wait = 400;
 static int iter = 2000;
 static int rate = 1;
-static int interval;
-static int debug;
+static int interval;  // Calculated from rate
+static int debug = 0;
 
 module_param(gpio, int, S_IRUSR);
 MODULE_PARM_DESC(gpio, "PPS GPIO");
