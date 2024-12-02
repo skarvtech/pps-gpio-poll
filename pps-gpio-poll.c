@@ -55,16 +55,32 @@ module_param(gpio_echo, int, S_IRUSR);
 MODULE_PARM_DESC(gpio_echo, "PPS echo GPIO");
 module_param(echo_invert, int, S_IRUSR | S_IWUSR);
 #endif
+
+// Control rising edge / falling edge triggering
 module_param(capture, int, S_IRUSR | S_IWUSR);
 MODULE_PARM_DESC(capture, "capture PPS event: 0 = falling, 1 = rising");
+
+// This controls the polling interval when not in 'wait mode'
+// E.g. when searching for the next PPS without any reference of previous events (first event or lost event)
 module_param(poll, int, S_IRUSR | S_IWUSR);
 MODULE_PARM_DESC(poll, "polling interval (microseconds)");
+
+// This determines the next time to start busy polling when in 'wait mode'
+// The value is subtracted from the measured time between the two last PPS events
 module_param(wait, int, S_IRUSR | S_IWUSR);
 MODULE_PARM_DESC(wait, "time to wait for PPS event (microseconds)");
-module_param(iter, int, S_IRUSR | S_IWUSR);
+
+// The expected PPS rate in Hz. Used to schedule the first busy polling event.
+// Only used until the interval can be calculated from the first two PPS events.
 MODULE_PARM_DESC(rate, "PPS rate (Hz)");
 module_param(rate, int, S_IRUSR | S_IWUSR);
+
+// The maximum number of GPIO reads in the wait loop
+// Usually not the problem when dropping PPS events
+module_param(iter, int, S_IRUSR | S_IWUSR);
 MODULE_PARM_DESC(iter, "maximum number of GPIO reads in the wait loop");
+
+// Set to 1 to enable debug messages
 module_param(debug, int, S_IRUSR | S_IWUSR);
 
 
