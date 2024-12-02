@@ -41,8 +41,8 @@ static int gpio_echo = -1;
 static int echo_invert = 1;
 #endif
 static int capture = 1;
-static int poll = 100;
-static int wait = 15;
+static int poll = 800;
+static int wait = 400;
 static int iter = 2000;
 static int rate = 1;
 static int interval;
